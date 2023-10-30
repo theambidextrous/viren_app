@@ -1,0 +1,55 @@
+doctype html
+head
+  meta(charset='utf-8')
+  meta(name='viewport' content='width=device-width, initial-scale=1')
+  meta(name='description' content='')
+  title Room Reservation
+  link(href='../dist/css/bootstrap.min.css' rel='stylesheet')
+  style.
+    .bd-placeholder-img {
+    font-size: 1.125rem;
+    text-anchor: middle;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    user-select: none;
+    }
+    @media (min-width: 768px) {
+    .bd-placeholder-img-lg {
+    font-size: 3.5rem;
+    }
+    }
+  link(href='../offcanvas.css' rel='stylesheet')
+
+main.container
+  .d-flex.align-items-center.p-3.my-3.text-white.bg-purple.rounded.shadow-sm
+    .lh-1
+      h1.h6.mb-0.text-white.lh-1 Room Reservation App
+  
+  .my-3.p-3.bg-body.rounded.shadow-sm
+    h6.border-bottom.pb-2.mb-0 Reserve Room
+    .d-flex.text-muted.pt-3
+    form(method='POST' action='/reserve-room')
+        .mb-3
+            select.form-select(aria-label='Default select example' required='' name='username')
+                option(selected='') Choose Student
+                each user in users
+                    option(value=user.student_username)=user.last_name + ` ` + user.first_name
+        
+        .mb-5
+            label.form-label(for='roomNumber') Room Number
+            input.form-control(type='text' value=roomNumber required='' name='roomNumber')
+        
+        
+        .mb-5
+            select.form-select(aria-label='Default select example' name='slot' required='')
+                option(selected='') Choose Slot
+                each slot in slots
+                    option(value=slot.key)=slot.value
+
+        input.btn.btn-primary(type='submit' name='save' value='Reserve Room')
+
+
+
+
+script(src='../dist/js/bootstrap.min.js')
+script(src='../offcanvas.js')

@@ -1,32 +1,48 @@
 const express = require("express");
 const router = express.Router();
-const rooms = require("../db/rooms");
+const rooms = require("../controller/rooms");
 
-router.get("/", async (req, res) => {
-  const allRooms = await rooms.getRooms();
-  res.render("homepage", { data: allRooms });
+router.get("/", (req, res) => {
+  if (req.session.bookingsData) {
+    const { bookingsData } = req.session;
+    res.render("homepage", { data: bookingsData });
+  } else {
+    req.session.bookingsData = rooms.getRooms();
+    res.render("homepage", { data: req.session.bookingsData });
+  }
 });
 
-router.get("/reserve-room/:roomId", async (req, res) => {
-  const room = await rooms.getRoom(req.params.roomId);
-  const users = await rooms.getUsers();
+router.get("/reserve-room/:roomId", (req, res) => {
+  const { bookingsData } = req.session;
+  const room = rooms.getRoom(bookingsData, Number(req.params.roomId));
+  const users = rooms.getUsers();
   const slots = [
     { key: "morning_available", value: "Morning" },
     { key: "afternoon_available", value: "Afternoon" },
     { key: "evening_available", value: "Evening" },
   ];
-  const roomInfo = room[0];
-  res.render("reserve", { roomNumber: roomInfo.room_number, users, slots });
+  res.render("reserve", { roomNumber: room.room_number, users, slots });
 });
 
-router.post("/reserve-room", async (req, res) => {
+router.post("/reserve-room", (req, res) => {
   const { username, roomNumber, slot } = req.body;
-  await rooms.reserveRoom(roomNumber, username, slot);
+  const { bookingsData } = req.session;
+  const updatedList = rooms.reserveRoom(
+    bookingsData,
+    roomNumber,
+    username,
+    slot
+  );
+  req.session.bookingsData = updatedList;
+  req.session.save();
   res.redirect("/");
 });
 
-router.get("/clear-all-reservations", async (req, res) => {
-  await rooms.clearRoomReservations();
+router.get("/clear-all-reservations", (req, res) => {
+  const { bookingsData } = req.session;
+  const clearedRooms = rooms.clearRoomReservations(bookingsData);
+  req.session.bookingsData = clearedRooms;
+  req.session.save();
   res.redirect("/");
 });
 
